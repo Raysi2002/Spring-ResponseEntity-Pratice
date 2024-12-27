@@ -1,5 +1,6 @@
 package com.raysi.responseentitypratice.service;
 
+import com.raysi.responseentitypratice.customexception.BussinessException;
 import com.raysi.responseentitypratice.entity.Watch;
 import com.raysi.responseentitypratice.repository.WatchRepository;
 import org.springframework.stereotype.Service;
@@ -32,14 +33,35 @@ public class WatchServiceImplementation implements WatchService {
 
     @Override
     public void saveWatch(Watch watch) {
-        // Save a single watch to the database
-        watchRepository.save(watch);
+       try{
+           if(watch.getName().isEmpty() || watch.getName().isBlank()){
+               throw new BussinessException("701", "Name can't be empty");
+           }
+           watchRepository.save(watch);
+       }catch (IllegalArgumentException e){
+           throw new BussinessException("702", "Invalid input from user" + e.getMessage());
+       }
     }
 
     @Override
-    public void saveWatches(List<Watch> watch) {
+    public void saveWatches(List<Watch> watches) {
         // Save a list of watches to the database
-        watchRepository.saveAll(watch);
+        boolean flag = false;
+        for(Watch watch : watches){
+            if(watch.getName().isBlank() || watch.getName().isEmpty()){
+                flag = true;
+            }
+        }
+        try{
+            if(flag){
+                throw new BussinessException("701", "Name can't be empty");
+            }
+            watchRepository.saveAll(watches);
+        }catch (IllegalArgumentException e){
+            throw new BussinessException("702", "Invalid input from user" + e.getMessage());
+        }catch (Exception e){
+            throw new BussinessException("703", "Something went wrong in service layer" + e.getMessage());
+        }
     }
 
     @Override
